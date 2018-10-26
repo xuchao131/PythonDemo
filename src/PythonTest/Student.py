@@ -10,6 +10,8 @@ import os
 import pickle
 import json
 from multiprocessing import Process
+import re
+from datetime import datetime, timedelta
 logging.basicConfig(level=logging.INFO)
 
 #定义Student类并继承Object
@@ -127,7 +129,7 @@ print(pickle.dumps(d));#pickle.dumps()方法把任意对象序列化成一个byt
 print(json.dumps(d));#把Python对象变成一个JSON
 #把JSON反序列化为Python对象，用loads()或者对应的load()方法，前者把JSON的字符串反序列化，后者从file-like Object中读取字符串并反序列化
 print(json.loads(json.dumps(d)));
-'''（多进程、多线程这块不太清楚）创建子进程时，只需要传入一个执行函数和函数的参数，创建一个Process实例，用start()方法启动，
+'''（进程和线程这块不太清楚）创建子进程时，只需要传入一个执行函数和函数的参数，创建一个Process实例，用start()方法启动，
    join()方法可以等待子进程结束后再继续往下运行，通常用于进程间的同步'''
 #子进程要执行的代码
 def run_proc(name):
@@ -139,3 +141,39 @@ if __name__=='__main__':
     p.start();
     p.join();
     print('Child process end.');
+'''正则表达式：用\d可以匹配一个数字，用\w可以匹配一个字母或数字，用.可以匹配任意字符，用*表示任意个字符（包括0个），
+       用+表示至少一个字符，用?表示0个或1个字符，用{n}表示n个字符，用{n,m}表示n-m个字符，用\s可以匹配一个空格（包括Tab等空白符），
+   (A|B)可以匹配A或B，^表示行的开头，^\d表示必须以数字开头，$表示行的结束，\d$表示必须以数字结束，
+   re.match(r'正则表达式', '要匹配的字符串')用来判断是否匹配，r可以替代转义符“\”，[]可以表示范围'''
+test = '123@126.com';
+if re.match(r'^[0-9a-zA-Z]+@[0-9a-zA-Z]+.(com|cn|com.cn)$',test):
+    print('ok');
+else:
+    print('failed');
+#re.split(r'[\s\,]+', 'a,b, c  d')用来切割字符串
+#用()表示要提取的分组（Group），如：^(\d{3})-(\d{3,8})$分别定义了两个组，可以直接从匹配的字符串中提取出区号和本地号码
+m = re.match(r'^(\d{3})-(\d{3,8})$','010-123456');
+print(m.group(0));#group(0)永远是原始字符串，group(1)表示第1个字符串
+print(m.group(1));
+print(m.group(2));
+#出于效率的考虑，我们可以预编译该正则表达式，在重复使用时就不需要编译这个步骤了
+re_telephone = re.compile(r'^(\d{3})-(\d{3,8})$');
+re_telephone.match('010-12345').groups();
+#获取当前日期和时间
+nowTime = datetime.now();
+print(nowTime);
+#把datetime转换为timestamp
+print(nowTime.timestamp());
+#把timestamp转换为datetime
+t = nowTime.timestamp();
+print(datetime.fromtimestamp(t));
+#timestamp也可以直接被转换到UTC标准时区的时间
+print(datetime.utcfromtimestamp(t));
+#把str转换为datetime
+strDate = datetime.strptime('2018-10-26 03:45:42','%Y-%m-%d %H:%M:%S');
+print(strDate);
+#把datetime转换为str
+print(nowTime.strftime('%Y-%m-%d %H:%M:%S'));
+#datetime加减需要导入timedelta类
+print(nowTime + timedelta(hours=10));
+print(nowTime - timedelta(days=1));
